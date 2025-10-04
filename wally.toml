@@ -1,0 +1,12 @@
+[package]
+name = "ivasmigins/InputContextHandler"
+description = ""
+license = "MIT"
+authors = ["ivasmigins"]
+version = "0.1.0"
+registry = "https://github.com/UpliftGames/wally-index"
+realm = "shared"
+repository = "https://github.com/ivasmigins/InputContextHandler"
+exclude = ["aftman.toml"]
+
+[dependencies]
