@@ -114,3 +114,5 @@ export type InputBindingHandler = {
 	SetWASD: (self: InputBindingHandler) -> InputBindingHandler,
 	SetArrowKeys: (self: InputBindingHandler) -> InputBindingHandler,
 }
+
+return nil

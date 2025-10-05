@@ -12,9 +12,9 @@
 --]]
 
 --// Imports //--
-local Trove = require("./Trove")
-local InputActionHandler = require("./InputActionHandler")
-local TypesDefinition = require("./Types.d")
+local Trove = require("@self/Trove")
+local InputActionHandler = require("@self/InputActionHandler")
+local TypesDefinition = require("@self/Types.d")
 
 --// Types //--
 type InputContextHandler = TypesDefinition.InputContextHandler
