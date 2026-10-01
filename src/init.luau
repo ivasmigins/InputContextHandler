@@ -92,7 +92,7 @@ function InputContextHandler.new(name: string, parent: Instance?): InputContextH
 
 	self:_cacheActions()
 
-	return self
+	return (self :: any) :: InputContextHandler
 end
 
 --// Configuration Methods //--

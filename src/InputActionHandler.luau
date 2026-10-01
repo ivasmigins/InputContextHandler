@@ -97,7 +97,7 @@ function InputActionHandler.new(inputAction: InputAction): InputActionHandler
 	self = setmetatable(self, InputActionHandler)
 	self:_cacheBindings()
 
-	return self
+	return (self :: any) :: InputActionHandler
 end
 
 --// Configuration Methods //--

@@ -95,7 +95,7 @@ function InputBindingHandler.new(inputBinding: InputBinding): InputBindingHandle
 
 	self = setmetatable(self, InputBindingHandler)
 
-	return self
+	return (self :: any) :: InputBindingHandler
 end
 
 --// Basic Configuration Methods //--
