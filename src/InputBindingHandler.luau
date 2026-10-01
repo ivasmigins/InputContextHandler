@@ -12,7 +12,7 @@
 --]]
 
 --// Imports //--
-local Trove = require("./Trove")
+local Trove = require(script.Parent.Parent.Trove)
 local TypesDefinition = require("./Types.d")
 
 --// Types //--
@@ -27,6 +27,18 @@ local PROPERTY_WHITELIST = {
 	ReleasedThreshold = true,
 	Scale = true,
 	Vector2Scale = true,
+	Vector3Scale = true,
+	-- Binding behaviour
+	Type = true,
+	PrimaryModifier = true,
+	SecondaryModifier = true,
+	UIModifier = true,
+	PointerIndex = true,
+	ResponseCurve = true,
+	ClampMagnitudeToOne = true,
+	-- Display
+	DisplayName = true,
+	DisplayImage = true,
 	-- Directional KeyCodes
 	Forward = true,
 	Backward = true,
@@ -115,6 +127,92 @@ end
 
 function InputBindingHandler:SetVector2Scale(scale: Vector2)
 	self._binding.Vector2Scale = scale
+	return self
+end
+
+function InputBindingHandler:SetVector3Scale(scale: Vector3)
+	self._binding.Vector3Scale = scale
+	return self
+end
+
+--[[
+	Sets how this binding is driven.
+	@param bindingType - Automatic (driven by hardware input) or Scriptable (driven only by Fire)
+]]
+function InputBindingHandler:SetType(bindingType: Enum.InputBindingType)
+	self._binding.Type = bindingType
+	return self
+end
+
+--[[
+	Sets a modifier key that must be held for this binding to activate.
+	@param keyCode - Enum.KeyCode for the modifier
+]]
+function InputBindingHandler:SetPrimaryModifier(keyCode: Enum.KeyCode)
+	self._binding.PrimaryModifier = keyCode
+	return self
+end
+
+--[[
+	Sets a second modifier key that must be held for this binding to activate.
+	@param keyCode - Enum.KeyCode for the modifier
+]]
+function InputBindingHandler:SetSecondaryModifier(keyCode: Enum.KeyCode)
+	self._binding.SecondaryModifier = keyCode
+	return self
+end
+
+--[[
+	Sets a GuiButton that must be held for this binding to activate.
+	@param uiButton - GuiButton acting as the modifier
+]]
+function InputBindingHandler:SetUIModifier(uiButton: GuiButton)
+	self._binding.UIModifier = uiButton
+	return self
+end
+
+--[[
+	Sets which pointer (touch contact) this binding responds to.
+	@param index - Pointer index
+]]
+function InputBindingHandler:SetPointerIndex(index: number)
+	self._binding.PointerIndex = index
+	return self
+end
+
+--[[
+	Sets the exponent applied to analog input, for finer control near the centre.
+	@param exponent - Ranges between 1 and 10; 1 is linear
+]]
+function InputBindingHandler:SetResponseCurve(exponent: number)
+	self._binding.ResponseCurve = exponent
+	return self
+end
+
+--[[
+	Sets whether composite directional input is clamped to a magnitude of one.
+	@param clamp - true to clamp (the engine default)
+]]
+function InputBindingHandler:SetClampMagnitudeToOne(clamp: boolean)
+	self._binding.ClampMagnitudeToOne = clamp
+	return self
+end
+
+--[[
+	Sets the human-readable name used when this binding is surfaced in UI.
+	@param displayName - Name to display
+]]
+function InputBindingHandler:SetDisplayName(displayName: string)
+	self._binding.DisplayName = displayName
+	return self
+end
+
+--[[
+	Sets the image used when this binding is surfaced in UI.
+	@param image - Content pointing at the image to display
+]]
+function InputBindingHandler:SetDisplayImage(image: Content)
+	self._binding.DisplayImage = image
 	return self
 end
 
@@ -209,6 +307,19 @@ function InputBindingHandler:SetArrowKeys()
 end
 
 --// Utility Methods //--
+
+--[[
+	Drives the parent InputAction to the given state through this binding.
+
+	Requires Type to be Enum.InputBindingType.Scriptable; the engine throws on an
+	Automatic binding. This is the supported replacement for InputAction:Fire,
+	which Roblox has deprecated.
+
+	@param state - The state to apply (must match the parent action's Type).
+]]
+function InputBindingHandler:Fire(state: any)
+	self._binding:Fire(state)
+end
 
 function InputBindingHandler:GetInstance(): InputBinding
 	return self._binding

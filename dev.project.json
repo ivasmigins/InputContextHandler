@@ -1,0 +1,12 @@
+{
+  "name": "InputContextHandler",
+  "tree": {
+    "$className": "DataModel",
+    "ReplicatedStorage": {
+      "$path": "Packages",
+      "InputContextHandler": {
+        "$path": "src"
+      }
+    }
+  }
+}

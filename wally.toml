@@ -1,12 +1,14 @@
 [package]
 name = "ivasmigins/inputcontexthandler"
-description = ""
+description = "A fluent, code-first wrapper around Roblox's Input Action System (InputContext, InputAction, InputBinding) with full Luau type definitions."
 license = "MIT"
 authors = ["ivasmigins"]
-version = "0.1.2"
+version = "0.2.0"
 registry = "https://github.com/UpliftGames/wally-index"
 realm = "shared"
 repository = "https://github.com/ivasmigins/InputContextHandler"
-exclude = ["aftman.toml"]
+exclude = ["**"]
+include = ["src", "src/*", "default.project.json", "wally.toml", "LICENSE"]
 
 [dependencies]
+Trove = "sleitnick/trove@1.8.0"

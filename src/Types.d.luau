@@ -34,10 +34,14 @@ export type InputActionHandler = {
 	-- Config
 	SetType: (self: InputActionHandler, actionType: Enum.InputActionType) -> InputActionHandler,
 	SetEnabled: (self: InputActionHandler, enabled: boolean) -> InputActionHandler,
+	SetDisplayName: (self: InputActionHandler, displayName: string) -> InputActionHandler,
 
 	-- Dynamic properties
 	Type: Enum.InputActionType?,
 	Enabled: boolean?,
+	DisplayName: string?,
+	-- Read-only on the engine instance; assigning throws.
+	PreferredBinding: InputBinding?,
 
 	-- Custom properties
 	_bindings: { [string]: InputBindingHandler },
@@ -60,14 +64,18 @@ export type InputActionHandler = {
 	AddArrowKeysBinding: (self: InputActionHandler, name: string) -> InputActionHandler,
 
 	-- Events
-	OnPressed: (self: InputActionHandler, callback: (state: any) -> ()) -> InputActionHandler,
-	OnReleased: (self: InputActionHandler, callback: (state: any) -> ()) -> InputActionHandler,
+	-- Pressed and Released are fired by the engine with no arguments.
+	OnPressed: (self: InputActionHandler, callback: () -> ()) -> InputActionHandler,
+	OnReleased: (self: InputActionHandler, callback: () -> ()) -> InputActionHandler,
 	OnStateChanged: (self: InputActionHandler, callback: (state: any) -> ()) -> InputActionHandler,
 }
 
 export type InputBindingHandler = {
 	GetInstance: (self: InputBindingHandler) -> InputBinding,
 	Destroy: (self: InputBindingHandler) -> (),
+
+	-- Action Methods
+	Fire: (self: InputBindingHandler, state: any) -> (),
 
 	-- Dynamic properties
 	KeyCode: Enum.KeyCode?,
@@ -76,6 +84,16 @@ export type InputBindingHandler = {
 	ReleasedThreshold: number?,
 	Scale: number?,
 	Vector2Scale: Vector2?,
+	Vector3Scale: Vector3?,
+	Type: Enum.InputBindingType?,
+	PrimaryModifier: Enum.KeyCode?,
+	SecondaryModifier: Enum.KeyCode?,
+	UIModifier: GuiButton?,
+	PointerIndex: number?,
+	ResponseCurve: number?,
+	ClampMagnitudeToOne: boolean?,
+	DisplayName: string?,
+	DisplayImage: Content?,
 	Forward: Enum.KeyCode?,
 	Backward: Enum.KeyCode?,
 	Up: Enum.KeyCode?,
@@ -90,6 +108,16 @@ export type InputBindingHandler = {
 	SetReleasedThreshold: (self: InputBindingHandler, threshold: number) -> InputBindingHandler,
 	SetScale: (self: InputBindingHandler, scale: number) -> InputBindingHandler,
 	SetVector2Scale: (self: InputBindingHandler, scale: Vector2) -> InputBindingHandler,
+	SetVector3Scale: (self: InputBindingHandler, scale: Vector3) -> InputBindingHandler,
+	SetType: (self: InputBindingHandler, bindingType: Enum.InputBindingType) -> InputBindingHandler,
+	SetPrimaryModifier: (self: InputBindingHandler, keyCode: Enum.KeyCode) -> InputBindingHandler,
+	SetSecondaryModifier: (self: InputBindingHandler, keyCode: Enum.KeyCode) -> InputBindingHandler,
+	SetUIModifier: (self: InputBindingHandler, uiButton: GuiButton) -> InputBindingHandler,
+	SetPointerIndex: (self: InputBindingHandler, index: number) -> InputBindingHandler,
+	SetResponseCurve: (self: InputBindingHandler, exponent: number) -> InputBindingHandler,
+	SetClampMagnitudeToOne: (self: InputBindingHandler, clamp: boolean) -> InputBindingHandler,
+	SetDisplayName: (self: InputBindingHandler, displayName: string) -> InputBindingHandler,
+	SetDisplayImage: (self: InputBindingHandler, image: Content) -> InputBindingHandler,
 
 	-- Directional
 	SetDirections: (

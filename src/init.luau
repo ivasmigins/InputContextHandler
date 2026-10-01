@@ -12,7 +12,7 @@
 --]]
 
 --// Imports //--
-local Trove = require("@self/Trove")
+local Trove = require(script.Parent.Trove)
 local InputActionHandler = require("@self/InputActionHandler")
 local TypesDefinition = require("@self/Types.d")
 

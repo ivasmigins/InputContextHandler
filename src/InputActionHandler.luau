@@ -12,7 +12,7 @@
 --]]
 
 --// Imports //--
-local Trove = require("./Trove")
+local Trove = require(script.Parent.Parent.Trove)
 local InputBindingHandler = require("./InputBindingHandler")
 local TypesDefinition = require("./Types.d")
 
@@ -24,12 +24,24 @@ type InputActionHandler = TypesDefinition.InputActionHandler
 local PROPERTY_WHITELIST = {
 	Type = true,
 	Enabled = true,
+	DisplayName = true,
+	PreferredBinding = true,
+}
+
+-- Whitelisted properties the engine exposes as read-only: readable, but not assignable.
+local READ_ONLY_PROPERTIES = {
+	PreferredBinding = true,
 }
 
 -- Explicitly whitelisted custom properties
 local CUSTOM_PROPERTIES = {
 	_bindings = true,
+	_fireBinding = true,
 }
+
+-- Name of the internal Scriptable InputBinding that backs Fire.
+-- Roblox deprecated InputAction:Fire in favour of InputBinding:Fire on a Scriptable binding.
+local FIRE_BINDING_NAME = "__InputContextHandlerFire"
 
 --// Class //--
 
@@ -53,6 +65,10 @@ InputActionHandler.__index = function(self, key)
 end
 
 InputActionHandler.__newindex = function(self, key, value)
+	if READ_ONLY_PROPERTIES[key] then
+		error(`Property '{key}' is read-only`, 2)
+	end
+
 	local action = rawget(self, "_action")
 	if action and PROPERTY_WHITELIST[key] then
 		action[key] = value
@@ -93,6 +109,15 @@ end
 
 function InputActionHandler:SetEnabled(enabled: boolean)
 	self._action.Enabled = enabled
+	return self
+end
+
+--[[
+	Sets the human-readable name used when this action is surfaced in UI.
+	@param displayName - Name to display
+]]
+function InputActionHandler:SetDisplayName(displayName: string)
+	self._action.DisplayName = displayName
 	return self
 end
 
@@ -211,16 +236,35 @@ end
 
 --// Event Connection Methods //--
 
-function InputActionHandler:OnPressed(callback: (state: any) -> ())
+--[[
+	Connects to the action being pressed. Only fires for Bool actions, on the
+	false -> true transition. Roblox passes no arguments to this event.
+	@param callback - Called with no arguments
+]]
+function InputActionHandler:OnPressed(callback: () -> ())
 	self._trove:Connect(self._action.Pressed, callback)
 	return self
 end
 
-function InputActionHandler:OnReleased(callback: (state: any) -> ())
+--[[
+	Connects to the action being released. Only fires for Bool actions, on the
+	true -> false transition. Roblox passes no arguments to this event.
+	@param callback - Called with no arguments
+]]
+function InputActionHandler:OnReleased(callback: () -> ())
 	self._trove:Connect(self._action.Released, callback)
 	return self
 end
 
+--[[
+	Connects to every state change, for all action types.
+
+	For continuous analog input this fires only when the value changes, so a
+	thumbstick held at a fixed angle fires once. Poll GetState() each frame for
+	those cases instead.
+
+	@param callback - Called with the new state
+]]
 function InputActionHandler:OnStateChanged(callback: (state: any) -> ())
 	self._trove:Connect(self._action.StateChanged, callback)
 	return self
@@ -230,10 +274,28 @@ end
 
 --[[
 	Updates the underlying InputAction to the given state and fires the appropriate signals.
+
+	Roblox deprecated InputAction:Fire in favour of InputBinding:Fire on a binding
+	whose Type is Enum.InputBindingType.Scriptable, so this lazily creates and
+	reuses one such binding on the action. The binding is internal: it is kept out
+	of GetAllBindings and is cleaned up with the handler.
+
 	@param state - The new state to fire (must match the action's Type).
 ]]
 function InputActionHandler:Fire(state: any)
-	self._action:Fire(state)
+	local binding = self._fireBinding
+
+	if not binding or binding.Parent ~= self._action then
+		binding = Instance.new("InputBinding")
+		binding.Name = FIRE_BINDING_NAME
+		binding.Type = Enum.InputBindingType.Scriptable
+		binding.Parent = self._action
+
+		self._fireBinding = binding
+		self._trove:Add(binding)
+	end
+
+	binding:Fire(state)
 end
 
 --[[
@@ -258,11 +320,19 @@ end
 
 function InputActionHandler:_cacheBindings()
 	for _, child in self._action:GetChildren() do
-		if child:IsA("InputBinding") then
-			local handler = InputBindingHandler.new(child)
-			self._bindings[child.Name] = handler
-			self._trove:Add(handler)
+		if not child:IsA("InputBinding") then
+			continue
 		end
+
+		-- Adopt, but do not expose, the internal Scriptable binding backing Fire.
+		if child.Name == FIRE_BINDING_NAME then
+			self._fireBinding = child
+			continue
+		end
+
+		local handler = InputBindingHandler.new(child)
+		self._bindings[child.Name] = handler
+		self._trove:Add(handler)
 	end
 end
 
